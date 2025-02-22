@@ -1,0 +1,11 @@
+{
+  "target": "ES2022",
+  "module": "CommonJS",
+  "outDir": "./dist",
+  "rootDir": "./src",
+  "strict": true,
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
