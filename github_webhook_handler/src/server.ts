@@ -3,16 +3,13 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import crypto from "crypto"
 import axios from "axios";
+import { fetchFileContent } from './services/github'
+import { GITHUB_API_URL, GITHUB_TOKEN, GITHUB_WEBHOOK_SECRET } from './config'
 
 dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
-
-const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || "";
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
-const GITHUB_API_URL = "https://api.github.com";
-
 
 const verifySignature = (req: express.Request, res: express.Response, buf: Buffer) => {
   const signature = req.headers["x-hub-signature-256"] as string;
@@ -67,6 +64,11 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
 
     const changedFiles = response.data.map((file: any) => file.filename);
     console.log(`Changed files:`, changedFiles);
+
+    for (const filePath of changedFiles) {
+      const fileContent = await fetchFileContent(repoFullName, filePath, payload.pull_request.head.sha);
+      console.log(`Content for file ${filePath}:`, fileContent);
+    }
 
     res.status(200).send("Files fetched");
   } catch (error) {
