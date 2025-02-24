@@ -1,12 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import bodyParser from "body-parser";
-import dotenv from "dotenv";
 import crypto from "crypto"
 import axios from "axios";
 import { fetchFileContent } from './services/github'
 import { GITHUB_API_URL, GITHUB_TOKEN, GITHUB_WEBHOOK_SECRET } from './config'
 
-dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
