@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { fetchFileContent, fetchPullRequestFiles } from '../services/github'
+import { generateCodeReview } from '../services/openai'
 
 export const handleWebhook = async (req: Request, res: Response, next: NextFunction):Promise<void>  => {
   const event = req.headers["x-github-event"];
@@ -22,6 +23,9 @@ export const handleWebhook = async (req: Request, res: Response, next: NextFunct
     for (const filePath of changedFiles) {
       const fileContent = await fetchFileContent(repoFullName, filePath, payload.pull_request.head.sha);
       console.log(`Content for file ${filePath}:`, fileContent);
+
+      const aiReview = await generateCodeReview(filePath, fileContent);
+      console.log(`AI Review for ${filePath}:\n`, aiReview);
     }
 
     res.status(200).send("Files fetched and contents retrieved.");
