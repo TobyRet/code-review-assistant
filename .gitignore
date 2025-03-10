@@ -1,4 +1,5 @@
 github_webhook_handler/node_modules/
 github_webhook_handler/dist/
 github_webhook_handler/.env
+github_webhook_handler/coverage/
 
