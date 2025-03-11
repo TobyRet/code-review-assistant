@@ -10,7 +10,12 @@ const openai = new OpenAI({
 export const generateCodeReview = async (params: GenerateCodeReviewParams): Promise<void> => {
   const { repoFullName, prNumber, fileName, fileContent } = params
   try {
-    const prompt = `Review the following code file and provide constructive feedback with best practices:\n\nFile: ${fileName}\n\n${fileContent}`;
+
+    const prompt = `Review the following code file and provide constructive feedback with best practices.
+    
+    **File:** ${fileName}
+    
+    ${fileContent}`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo" as OpenAI.Chat.ChatModel,
@@ -19,10 +24,12 @@ export const generateCodeReview = async (params: GenerateCodeReviewParams): Prom
       max_tokens: 500,
     });
 
-    const reviewFeedback = response.choices[0].message.content || "No feedback generated.";
+    const reviewFeedback = `**Review for file: ${fileName}**\\n\\n${response.choices[0].message.content}` || "No feedback generated.";
     await postReviewComment(repoFullName, prNumber, reviewFeedback);
   } catch (error) {
     console.error("Error generating code review:", error);
     await postReviewComment(repoFullName, prNumber, "⚠️ Error: Unable to generate code review.");
   }
 };
+
+
