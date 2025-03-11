@@ -2,6 +2,7 @@ import axios from "axios"
 import { GITHUB_API_URL, GITHUB_TOKEN, GITHUB_WEBHOOK_SECRET } from "../config"
 import express from "express"
 import crypto from "crypto"
+import { sleep } from '../utils'
 
 const IGNORED_FILES = [
   "package-lock.json",
@@ -89,5 +90,52 @@ export const verifySignature = (
     )
   ) {
     return res.status(401).send("Signature verification failed");
+  }
+};
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000; // 2 seconds
+
+export const postReviewComment = async (
+  repoFullName: string,
+  prNumber: number,
+  comment: string
+): Promise<void> => {
+  let attempts = 0;
+
+  while (attempts < MAX_RETRIES) {
+    try {
+      await axios.post(
+        `${GITHUB_API_URL}/repos/${repoFullName}/issues/${prNumber}/comments`,
+        { body: comment },
+        {
+          headers: {
+            Authorization: `Bearer ${GITHUB_TOKEN}`,
+            Accept: "application/vnd.github.v3+json",
+          },
+        }
+      );
+      console.log(`Successfully posted review comment on PR #${prNumber}`);
+      return;
+    } catch (error) {
+      attempts++;
+      console.error(`Attempt ${attempts} - Failed to post review comment:`, error);
+
+      if (attempts < MAX_RETRIES) {
+        await sleep(RETRY_DELAY_MS);
+      } else {
+        console.error(`All attempts failed. Posting error message to PR.`);
+        await axios.post(
+          `${GITHUB_API_URL}/repos/${repoFullName}/issues/${prNumber}/comments`,
+          { body: "⚠️ Error: Unable to post review comment after multiple attempts." },
+          {
+            headers: {
+              Authorization: `Bearer ${GITHUB_TOKEN}`,
+              Accept: "application/vnd.github.v3+json",
+            },
+          }
+        );
+      }
+    }
   }
 };
