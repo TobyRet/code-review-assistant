@@ -2,6 +2,7 @@ import axios from "axios"
 import { GITHUB_API_URL, GITHUB_TOKEN, GITHUB_WEBHOOK_SECRET } from "../config"
 import express from "express"
 import crypto from "crypto"
+import { generateGitHubAppJWT, sleep } from '../utils'
 
 const IGNORED_FILES = [
   "package-lock.json",
@@ -89,5 +90,95 @@ export const verifySignature = (
     )
   ) {
     return res.status(401).send("Signature verification failed");
+  }
+};
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000; // 2 seconds
+
+export const postReviewComment = async (
+  repoFullName: string,
+  prNumber: number,
+  comment: string
+): Promise<void> => {
+  let attempts = 0;
+
+  while (attempts < MAX_RETRIES) {
+    try {
+      const installationId = await getInstallationId(repoFullName);
+      const accessToken = await getInstallationToken(installationId);
+
+      await axios.post(
+        `${GITHUB_API_URL}/repos/${repoFullName}/issues/${prNumber}/comments`,
+        { body: comment },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: "application/vnd.github.v3+json",
+          },
+        }
+      );
+      console.log(`Successfully posted review comment on PR #${prNumber}`);
+      return;
+    } catch (error) {
+      attempts++;
+      console.error(`Attempt ${attempts} - Failed to post review comment:`, error);
+
+      if (attempts < MAX_RETRIES) {
+        await sleep(RETRY_DELAY_MS);
+      } else {
+        console.error(`All attempts failed. Posting error message to PR.`);
+        await axios.post(
+          `${GITHUB_API_URL}/repos/${repoFullName}/issues/${prNumber}/comments`,
+          { body: "⚠️ Error: Unable to post review comment after multiple attempts." },
+          {
+            headers: {
+              Authorization: `Bearer ${GITHUB_TOKEN}`,
+              Accept: "application/vnd.github.v3+json",
+            },
+          }
+        );
+      }
+    }
+  }
+};
+
+export const getInstallationToken = async (installationId: number): Promise<string> => {
+  const jwt = generateGitHubAppJWT();
+
+  try {
+    const response = await axios.post(
+      `${GITHUB_API_URL}/app/installations/${installationId}/access_tokens`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      }
+    );
+
+    return response.data.token;
+  } catch (error) {
+    console.error("Error fetching installation token:", error);
+    throw new Error("Failed to obtain GitHub App installation token");
+  }
+};
+
+export const getInstallationId = async (repoFullName: string): Promise<number> => {
+  const jwt = generateGitHubAppJWT();
+
+  try {
+    const response = await axios.get(`${GITHUB_API_URL}/repos/${repoFullName}/installation`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    });
+
+    return response.data.id;
+  } catch (error) {
+    console.error("Error fetching installation ID:", error);
+    throw new Error("Failed to obtain GitHub App installation ID");
   }
 };
