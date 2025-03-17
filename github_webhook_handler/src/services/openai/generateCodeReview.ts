@@ -1,7 +1,7 @@
 import { OpenAI } from "openai";
-import { OPENAI_API_KEY } from '../config'
-import { postReviewComment } from './github'
-import { GenerateCodeReviewParams } from './openai.types'
+import { OPENAI_API_KEY } from '../../config'
+import { GenerateCodeReviewParams } from './types'
+import { postReviewComment } from '../github/postReviewComment'
 
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
