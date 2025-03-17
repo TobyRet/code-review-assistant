@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { fetchFileContent, fetchPullRequestFiles } from '../services/github'
-import { generateCodeReview } from '../services/openai'
+import { generateCodeReview } from '../services/openai/generateCodeReview'
 
 export const handleWebhook = async (req: Request, res: Response, next: NextFunction):Promise<void>  => {
   const event = req.headers["x-github-event"];
