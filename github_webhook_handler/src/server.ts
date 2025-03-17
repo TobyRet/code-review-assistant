@@ -2,11 +2,11 @@ import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import bodyParser from "body-parser";
+
 import { handleWebhook } from './controllers/webHookController'
 import { verifySignature } from './services/github/verifySignature'
 
 const app = express();
-app.use(bodyParser.json());
 
 app.use(
   bodyParser.json({
