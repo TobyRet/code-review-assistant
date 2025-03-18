@@ -17,7 +17,7 @@ It also suggests improvements and recommendations to fix detected issues.
 
 ## Features to-do 
 
-- [ ] Post Open AI feedback per file (that has changed) rather than a long summary at the end.
+- [ ] 🚧 *In progress* 🚧 Post Open AI feedback per file (that has changed) rather than a long summary at the end.
 - [ ] Allow the user to dismiss Open AI's feedback (delete comment).
 - [ ] Track when a user has dismissed feedback so that duplicate feedback is not posted
 - [ ] A **React frontend** for users to view and manage (possibly trigger?) AI-generated analysis.
