@@ -15,14 +15,18 @@ It also suggests improvements and recommendations to fix detected issues.
 - [x] OpenAI returns the **code review analysis** to the assistant.
 - [x] The assistant **posts review comments** directly on the user's PR.
 
-## Features
+## Features to-do 
 
-- [ ] A **React frontend** for users to view and manage AI-generated analysis.
+- [ ] Post Open AI feedback per file (that has changed) rather than a long summary at the end.
+- [ ] Allow the user to dismiss Open AI's feedback (delete comment).
+- [ ] Track when a user has dismissed feedback so that duplicate feedback is not posted
+- [ ] A **React frontend** for users to view and manage (possibly trigger?) AI-generated analysis.
 
 ## Infrastructure
 
+- [ ] **Set up CI/CD** using **GitHub Actions** to run tests, then automate deployments.  
 - [ ] **Deploy** the assistant on **AWS Lambda**.
-- [ ] **Set up CI/CD** using **GitHub Actions** to automate deployments.  
+
 
 ## Progress Update: 13 Mar 2025
 
