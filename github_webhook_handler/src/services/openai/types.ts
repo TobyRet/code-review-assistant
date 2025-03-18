@@ -3,4 +3,5 @@ export interface GenerateCodeReviewParams {
   prNumber: number;
   fileName: string;
   fileContent: string;
+  latestCommitSha: string;
 }

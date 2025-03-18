@@ -4,13 +4,13 @@ import { GITHUB_API_URL, GITHUB_TOKEN } from '../../config'
 export const fetchFileContent = async (
   repoFullName: string,
   filePath: string,
-  sha: string
+  latestCommitSha: string
 ): Promise<string> => {
   try {
     const response = await axios.get(
       `${GITHUB_API_URL}/repos/${repoFullName}/contents/${filePath}`,
       {
-        params: { ref: sha },
+        params: { ref: latestCommitSha },
         headers: {
           Authorization: `Bearer ${GITHUB_TOKEN}`,
           Accept: "application/vnd.github.v3+json",

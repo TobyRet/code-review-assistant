@@ -6,6 +6,7 @@ jest.mock("axios");
 jest.mock("@/config", () => ({
   GITHUB_WEBHOOK_SECRET: "mocked-secret",
   GITHUB_API_URL: "https://api.github.com",
+  IGNORED_FILES: [],
 }));
 
 describe('fetchPullRequestFiles', () => {
