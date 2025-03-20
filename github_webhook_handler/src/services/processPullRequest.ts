@@ -2,7 +2,7 @@ import { fetchPullRequestFiles } from './github/fetchPullRequestFiles'
 import { fetchFileContent } from './github/fetchFileContent'
 import { generateCodeReview } from './openai/generateCodeReview'
 
-export const processPullRequest = async (repoFullName: string, prNumber: number, headSha: string) => {
+export const processPullRequest = async (repoFullName: string, prNumber: number, latestCommitSha: string) => {
   console.log(`PR #${prNumber} - Fetching changed files and their contents...`);
 
   try {
@@ -11,10 +11,10 @@ export const processPullRequest = async (repoFullName: string, prNumber: number,
     console.log(`Changed files:`, changedFiles);
 
     for (const fileName of changedFiles) {
-      const fileContent = await fetchFileContent(repoFullName, fileName, headSha);
+      const fileContent = await fetchFileContent(repoFullName, fileName, latestCommitSha);
       console.log(`Content for file ${fileName}:`, fileContent);
 
-      const aiReview = await generateCodeReview({ repoFullName, prNumber, fileName, fileContent });
+      const aiReview = await generateCodeReview({ repoFullName, prNumber, fileName, fileContent, latestCommitSha });
       console.log(`AI Review for ${fileName}:\n`, aiReview);
     }
 

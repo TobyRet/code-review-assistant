@@ -7,10 +7,10 @@ const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
-export const generateCodeReview = async (params: GenerateCodeReviewParams): Promise<void> => {
-  const { repoFullName, prNumber, fileName, fileContent } = params
+export const generateCodeReview = async (
+  { repoFullName, prNumber, fileName, fileContent, latestCommitSha }: GenerateCodeReviewParams
+): Promise<void> => {
   try {
-
     const prompt = `Review the following code file and provide constructive feedback with best practices.
     
     **File:** ${fileName}
@@ -24,11 +24,11 @@ export const generateCodeReview = async (params: GenerateCodeReviewParams): Prom
       max_tokens: 500,
     });
 
-    const reviewFeedback = `**Review for file: ${fileName}**\\n\\n${response.choices[0].message.content}` || "No feedback generated.";
-    await postReviewComment(repoFullName, prNumber, reviewFeedback);
+    const reviewFeedback = response.choices[0].message.content || "No feedback generated.";
+    await postReviewComment({repoFullName, prNumber, comment: reviewFeedback, filePath: fileName, latestCommitSha,});
   } catch (error) {
     console.error("Error generating code review:", error);
-    await postReviewComment(repoFullName, prNumber, "⚠️ Error: Unable to generate code review.");
+    await postReviewComment({ repoFullName, prNumber, comment: "⚠️ Error: Unable to generate code review.", filePath: fileName, latestCommitSha });
   }
 };
 

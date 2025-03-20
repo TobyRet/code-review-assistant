@@ -3,11 +3,10 @@ import { GITHUB_API_URL, GITHUB_TOKEN } from '../../config'
 import { sleep } from '../../utils'
 import { getInstallationId } from './getInstallationId'
 import { getInstallationToken } from './getInstallationToken'
+import { PostReviewCommentParams } from './types'
 
 export const postReviewComment = async (
-  repoFullName: string,
-  prNumber: number,
-  comment: string
+  {repoFullName, prNumber, comment, filePath, latestCommitSha}: PostReviewCommentParams
 ): Promise<void> => {
   let attempts = 0;
   const MAX_RETRIES = 3;
@@ -19,15 +18,22 @@ export const postReviewComment = async (
       const accessToken = await getInstallationToken(installationId);
 
       await axios.post(
-        `${GITHUB_API_URL}/repos/${repoFullName}/issues/${prNumber}/comments`,
-        { body: comment },
+        `${GITHUB_API_URL}/repos/${repoFullName}/pulls/${prNumber}/comments`,
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Accept: "application/vnd.github.v3+json",
-          },
-        }
-      );
+          body: comment,
+          commit_id: latestCommitSha,
+          path: filePath,
+          line: 1,
+          side: "RIGHT",
+        },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              Accept: "application/vnd.github.v3+json",
+            },
+          }
+      )
+
       console.log(`Successfully posted review comment on PR #${prNumber}`);
       return;
     } catch (error) {
